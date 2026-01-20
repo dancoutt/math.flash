@@ -47,8 +47,8 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
+            transition: opacity 0.4s ease-out;
+            pointer-events: none; /* Permite clicar no que está atrás durante o fade */
         }
 
         .splash-logo {
@@ -64,7 +64,7 @@
         }
 
         .loader-container {
-            width: 200px;
+            width: 180px;
             height: 4px;
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
@@ -81,7 +81,7 @@
             width: 0%;
             background: #fbbf24;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-            transition: width 0.3s ease-out;
+            transition: width 0.2s ease-out;
         }
 
         .bg-mesh {
@@ -134,7 +134,7 @@
         <div class="loader-container">
             <div id="loader-bar"></div>
         </div>
-        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Initializing App...</div>
+        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Connecting System...</div>
     </div>
 
     <div id="root"></div>
@@ -143,35 +143,37 @@
 
     <script>
       let progress = 0;
-      let appIsReady = false;
+      let hasReportedReady = false;
       const loaderBar = document.getElementById('loader-bar');
       const statusText = document.getElementById('status-text');
       const splash = document.getElementById('splash-screen');
 
-      // Progresso falso inicial para dar feedback visual imediato
+      // Progresso inteligente que desacelera no final esperando o React
       const progressInterval = setInterval(() => {
-        if (progress < 90) {
-          progress += Math.random() * 8;
-          if (progress > 90) progress = 90;
-          updateProgress();
+        if (progress < 85) {
+          progress += Math.random() * 12;
+        } else if (progress < 98) {
+          progress += 0.5; // Desacelera esperando o sinal real do React
         }
-      }, 100);
+        
+        if (progress > 98 && !hasReportedReady) progress = 98;
+        updateUI();
+      }, 120);
 
-      function updateProgress() {
+      function updateUI() {
         if (loaderBar) loaderBar.style.width = progress + '%';
-        if (progress > 50 && statusText && progress < 85) statusText.innerText = "Loading UI Engine";
-        if (progress >= 85 && statusText) statusText.innerText = "Ready to Play";
+        if (progress > 40 && statusText && progress < 80) statusText.innerText = "Loading UI";
+        if (progress >= 80 && statusText) statusText.innerText = "Finalizing";
       }
 
-      // Esta função será chamada pelo componente React AccountEntry
       window.signalAppReady = () => {
-        if (appIsReady) return;
-        appIsReady = true;
+        if (hasReportedReady) return;
+        hasReportedReady = true;
         clearInterval(progressInterval);
         progress = 100;
-        updateProgress();
+        updateUI();
+        if (statusText) statusText.innerText = "Ready";
         
-        // Pequeno atraso para o usuário ver a barra cheia antes do fade
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
@@ -179,13 +181,16 @@
               splash.style.display = 'none';
             }, 500);
           }
-        }, 300);
+        }, 200);
       };
 
-      // Fallback de segurança caso o React falhe
+      // Fallback robusto se o React falhar gravemente
       setTimeout(() => {
-        if (!appIsReady) window.signalAppReady();
-      }, 8000);
+        if (!hasReportedReady) {
+          console.warn("React initialization took too long, forcing splash hide.");
+          window.signalAppReady();
+        }
+      }, 6000);
     </script>
 </body>
 </html>
