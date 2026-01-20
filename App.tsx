@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const initializeApp = async () => {
+    const initializeApp = () => {
       try {
         const saved = localStorage.getItem('math-flash-pro-users');
         if (saved) {
@@ -35,9 +35,8 @@ const App: React.FC = () => {
           }
         }
       } catch (e) {
-        console.error("Storage initialization error:", e);
+        console.warn("Storage recovery skipped:", e);
       } finally {
-        // Garante que o App sempre saia do estado de loading após a tentativa de carregar dados
         setIsReady(true);
       }
     };
@@ -102,7 +101,6 @@ const App: React.FC = () => {
     setGameState('GAMEOVER');
   };
 
-  // Se o App não estiver pronto, não renderizamos nada para o Splash continuar visível
   if (!isReady) return null;
 
   return (
