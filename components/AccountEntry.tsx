@@ -13,7 +13,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   const [name, setName] = useState('');
 
   useEffect(() => {
-    // Sinaliza que a tela de login/nickname está pronta
+    // Avisa ao HTML que a tela de login já está montada e pronta para ser vista
     if (typeof (window as any).signalAppReady === 'function') {
       (window as any).signalAppReady();
     }

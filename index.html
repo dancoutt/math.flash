@@ -36,7 +36,7 @@
             display: block;
             background-color: #0f172a;
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
         #splash-screen {
@@ -49,7 +49,7 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.5s ease-out;
             pointer-events: none;
         }
 
@@ -83,7 +83,7 @@
             width: 0%;
             background: #fbbf24;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-            transition: width 0.3s ease-out;
+            transition: width 0.2s ease-out;
         }
 
         .bg-mesh {
@@ -136,7 +136,7 @@
         <div class="loader-container">
             <div id="loader-bar"></div>
         </div>
-        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Initializing App...</div>
+        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Connecting...</div>
     </div>
 
     <div id="root"></div>
@@ -147,47 +147,40 @@
       let progress = 0;
       let hasReportedReady = false;
       const loaderBar = document.getElementById('loader-bar');
-      const statusText = document.getElementById('status-text');
       const splash = document.getElementById('splash-screen');
 
-      // Progresso falso inicial para dar feedback visual imediato
       const progressInterval = setInterval(() => {
-        if (progress < 90) {
-          progress += Math.random() * 10;
-          if (progress > 90) progress = 90;
-          updateUI();
+        if (progress < 95) {
+          progress += Math.random() * 15;
+          if (progress > 95) progress = 95;
+          if (loaderBar) loaderBar.style.width = progress + '%';
         }
-      }, 150);
-
-      function updateUI() {
-        if (loaderBar) loaderBar.style.width = progress + '%';
-        if (progress > 40 && statusText && progress < 80) statusText.innerText = "Loading Modules";
-        if (progress >= 80 && statusText) statusText.innerText = "Finalizing UI";
-      }
+      }, 100);
 
       window.signalAppReady = () => {
         if (hasReportedReady) return;
         hasReportedReady = true;
         clearInterval(progressInterval);
-        progress = 100;
-        updateUI();
+        if (loaderBar) loaderBar.style.width = '100%';
         
-        // Pequeno atraso para garantir que o React renderizou o campo de login por baixo
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => {
               splash.style.display = 'none';
-              splash.remove(); // Remove do DOM para garantir que não bloqueie nada
-            }, 600);
+              splash.remove();
+            }, 500);
           }
-        }, 300);
+        }, 100);
       };
 
-      // Fallback robusto
+      // Se em 4 segundos o app não der sinal, forçamos a entrada para evitar tela travada
       setTimeout(() => {
-        if (!hasReportedReady) window.signalAppReady();
-      }, 6000);
+        if (!hasReportedReady) {
+          console.warn("App signal timeout, forcing splash removal.");
+          window.signalAppReady();
+        }
+      }, 4000);
     </script>
 </body>
 </html>
