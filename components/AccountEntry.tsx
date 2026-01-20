@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Brain } from 'lucide-react';
 import { UserProfile } from '../types.ts';
 
@@ -12,6 +12,13 @@ interface AccountEntryProps {
 const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingUsers, onSelectUser }) => {
   const [name, setName] = useState('');
 
+  useEffect(() => {
+    // Notifica o index.html que o campo de nickname está PRONTO para ser visto
+    if ((window as any).signalAppReady) {
+      setTimeout(() => (window as any).signalAppReady(), 100);
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim().length >= 2) {
@@ -21,7 +28,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a]">
-      <div className="mb-12 text-center">
+      <div className="mb-12 text-center animate-in fade-in zoom-in duration-700">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />
         </div>
@@ -33,7 +40,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
         </p>
       </div>
 
-      <div className="w-full max-w-sm space-y-8">
+      <div className="w-full max-w-sm space-y-8 animate-in slide-in-from-bottom-4 duration-700">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <input

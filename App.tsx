@@ -36,10 +36,6 @@ const App: React.FC = () => {
         console.error("Storage error:", e);
       } finally {
         setIsReady(true);
-        // Notifica o index.html que o React está pronto para assumir
-        if ((window as any).markAppAsReady) {
-          setTimeout(() => (window as any).markAppAsReady(), 100);
-        }
       }
     };
 
@@ -128,12 +124,11 @@ const App: React.FC = () => {
           />
         )}
 
-        {activeUser && gameState === 'PROFILE' && (
-          <ProfileView user={activeUser} onBack={() => setGameState('MENU')} />
-        )}
-
-        {activeUser && gameState === 'PRIVACY' && (
-          <PrivacyPolicy onBack={() => setGameState('MENU')} />
+        {activeUser && (gameState === 'PROFILE' || gameState === 'PRIVACY') && (
+           <div className="absolute inset-0 z-50">
+             {gameState === 'PROFILE' && <ProfileView user={activeUser} onBack={() => setGameState('MENU')} />}
+             {gameState === 'PRIVACY' && <PrivacyPolicy onBack={() => setGameState('MENU')} />}
+           </div>
         )}
 
         {gameState === 'PLAYING' && (
