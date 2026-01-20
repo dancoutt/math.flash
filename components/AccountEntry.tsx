@@ -20,13 +20,17 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white bg-[#0f172a] opacity-100 transition-opacity duration-300">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a] opacity-100 relative z-10">
       <div className="mb-12 text-center">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />
         </div>
-        <h1 className="text-4xl font-black italic tracking-tighter">MATH<span className="text-yellow-400">FLASH</span></h1>
-        <p className="text-indigo-200/40 text-[10px] font-black tracking-[0.4em] uppercase">Identity System</p>
+        <h1 className="text-4xl font-black italic tracking-tighter block">
+          MATH<span className="text-yellow-400">FLASH</span>
+        </h1>
+        <p className="text-indigo-200/40 text-[10px] font-black tracking-[0.4em] uppercase mt-2">
+          Identity System
+        </p>
       </div>
 
       <div className="w-full max-w-sm space-y-8">
@@ -39,7 +43,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
               placeholder="Enter Nickname"
               maxLength={12}
               autoFocus
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20 text-white"
+              className="w-full bg-white/10 border border-white/20 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20 text-white"
             />
             <button
               type="submit"
@@ -52,7 +56,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
         </form>
 
         {existingUsers.length > 0 && (
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-8 border-t border-white/5">
             <div className="flex items-center gap-4">
               <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Quick Switch</span>
             </div>
@@ -63,7 +67,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
                   onClick={() => onSelectUser(user)}
                   className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all text-left"
                 >
-                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs shrink-0`}>
+                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs shrink-0 text-white`}>
                     {user.name[0].toUpperCase()}
                   </div>
                   <span className="text-xs font-bold truncate text-white/80">{user.name}</span>

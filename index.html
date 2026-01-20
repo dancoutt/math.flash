@@ -25,9 +25,6 @@
             padding: 0;
             background-color: #0f172a;
             overflow: hidden;
-        }
-
-        body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: white;
             touch-action: manipulation;
@@ -36,6 +33,7 @@
         #root {
             min-height: 100vh;
             width: 100%;
+            display: block;
         }
 
         #splash-screen {
@@ -48,7 +46,7 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.4s ease-out;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .splash-logo {
@@ -70,7 +68,6 @@
             radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
             radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
           background-attachment: fixed;
-          min-height: 100vh;
         }
         
         @keyframes float {
@@ -78,6 +75,12 @@
           50% { transform: translateY(-10px); }
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes pulse-custom {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse-custom { animation: pulse-custom 2s ease-in-out infinite; }
     </style>
 
 <script type="importmap">
@@ -95,47 +98,48 @@
 </head>
 <body class="bg-mesh">
     <div id="splash-screen">
-        <div class="splash-logo animate-pulse">
+        <div class="splash-logo animate-pulse-custom">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.54Z"/>
                 <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.54Z"/>
             </svg>
         </div>
-        <div style="font-weight: 800; font-style: italic; letter-spacing: -0.05em; font-size: 24px;">
+        <div style="font-weight: 800; font-style: italic; letter-spacing: -0.05em; font-size: 24px; color: white;">
             MATH<span style="color: #fbbf24;">FLASH</span>
         </div>
     </div>
 
     <div id="root"></div>
 
-    <!-- Import único do ponto de entrada -->
     <script type="module" src="./index.tsx"></script>
 
     <script>
-      function hideSplash() {
+      const hideSplash = () => {
         const splash = document.getElementById('splash-screen');
         if (splash) {
           splash.style.opacity = '0';
-          setTimeout(() => {
-            splash.style.display = 'none';
-          }, 500);
+          setTimeout(() => splash.style.display = 'none', 500);
         }
+      };
+
+      // Observador para detectar quando o React renderiza
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.addedNodes.length > 0) {
+            hideSplash();
+            observer.disconnect();
+            break;
+          }
+        }
+      });
+
+      const root = document.getElementById('root');
+      if (root) {
+        observer.observe(root, { childList: true });
       }
 
-      // Verifica se o React realmente injetou algo no root
-      const checkRoot = setInterval(() => {
-        const root = document.getElementById('root');
-        if (root && root.children.length > 0) {
-          hideSplash();
-          clearInterval(checkRoot);
-        }
-      }, 100);
-
-      // Fallback de segurança: se em 8 segundos nada acontecer, esconde o splash para mostrar erros no console
-      setTimeout(() => {
-        clearInterval(checkRoot);
-        hideSplash();
-      }, 8000);
+      // Fallback
+      setTimeout(hideSplash, 6000);
     </script>
 </body>
 </html>

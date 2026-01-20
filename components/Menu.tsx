@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Play, Trophy, Brain, Settings, ShieldCheck, LogOut, Download } from 'lucide-react';
+import { Play, Trophy, Brain, Settings, ShieldCheck, LogOut } from 'lucide-react';
 import { Difficulty, UserProfile } from '../types.ts';
-import AdBanner from './AdBanner.tsx';
 
 interface MenuProps {
   onStart: () => void;
@@ -12,10 +11,9 @@ interface MenuProps {
   onViewProfile: () => void;
   onViewPrivacy: () => void;
   onLogout: () => void;
-  onInstall?: () => void;
 }
 
-const Menu: React.FC<MenuProps> = ({ onStart, difficulty, setDifficulty, activeUser, onViewProfile, onViewPrivacy, onLogout, onInstall }) => {
+const Menu: React.FC<MenuProps> = ({ onStart, difficulty, setDifficulty, activeUser, onViewProfile, onViewPrivacy, onLogout }) => {
   const [showSettings, setShowSettings] = useState(false);
 
   const diffConfigs = [
@@ -25,13 +23,13 @@ const Menu: React.FC<MenuProps> = ({ onStart, difficulty, setDifficulty, activeU
   ];
 
   return (
-    <div className="flex flex-col items-center justify-between min-h-screen text-white text-center animate-in fade-in duration-700 bg-[#0f172a]">
+    <div className="flex flex-col items-center justify-between min-h-screen w-full text-white text-center bg-[#0f172a] opacity-100 transition-opacity duration-500">
       <div className="w-full flex justify-between items-center p-8 pt-safe z-30">
         <button 
           onClick={onViewProfile}
           className="flex items-center gap-3 p-2 pr-4 bg-white/5 rounded-full border border-white/5"
         >
-          <div className={`w-8 h-8 rounded-full ${activeUser.avatarColor} flex items-center justify-center font-black text-xs shadow-lg`}>
+          <div className={`w-8 h-8 rounded-full ${activeUser.avatarColor} flex items-center justify-center font-black text-xs shadow-lg text-white`}>
             {activeUser.name[0].toUpperCase()}
           </div>
           <span className="text-xs font-black tracking-widest italic">{activeUser.name}</span>
@@ -46,7 +44,7 @@ const Menu: React.FC<MenuProps> = ({ onStart, difficulty, setDifficulty, activeU
           </button>
           
           {showSettings && (
-            <div className="absolute right-0 top-12 w-48 bg-indigo-900 border border-white/10 rounded-2xl p-2 shadow-2xl z-50">
+            <div className="absolute right-0 top-12 w-48 bg-indigo-950 border border-white/10 rounded-2xl p-2 shadow-2xl z-50">
               <button onClick={onLogout} className="w-full flex items-center gap-3 p-3 text-rose-400 font-bold text-sm">
                 <LogOut size={16} /> Trocar Perfil
               </button>

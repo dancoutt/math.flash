@@ -63,7 +63,7 @@ const GameOver: React.FC<GameOverProps> = ({ score, highScore, onRestart, onMenu
 
   if (isWatchingAd) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-white text-center bg-black animate-in fade-in duration-500">
+      <div className="flex flex-col items-center justify-center min-h-screen w-full p-6 text-white text-center bg-black">
         <Loader2 className="animate-spin mb-6 text-yellow-400" size={60} />
         <h2 className="text-3xl font-black italic tracking-tighter">SPONSOR BREAK</h2>
         <p className="text-white/40 mt-2 font-medium">WATCHING FOR REWARD...</p>
@@ -78,7 +78,7 @@ const GameOver: React.FC<GameOverProps> = ({ score, highScore, onRestart, onMenu
     : '---';
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white text-center animate-in zoom-in-95 duration-500">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white text-center bg-[#0f172a]">
       <div className="mb-4 relative">
         <div className="text-[10px] font-black text-white bg-red-600 px-5 py-1.5 rounded-full uppercase tracking-[0.3em] mb-8 inline-block shadow-lg shadow-red-600/20">Session Ended</div>
         
