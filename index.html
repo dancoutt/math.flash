@@ -36,7 +36,6 @@
         #root {
             min-height: 100vh;
             width: 100%;
-            display: block;
         }
 
         #splash-screen {
@@ -109,6 +108,7 @@
 
     <div id="root"></div>
 
+    <!-- Import único do ponto de entrada -->
     <script type="module" src="./index.tsx"></script>
 
     <script>
@@ -125,17 +125,17 @@
       // Verifica se o React realmente injetou algo no root
       const checkRoot = setInterval(() => {
         const root = document.getElementById('root');
-        if (root && root.innerHTML.trim().length > 0) {
+        if (root && root.children.length > 0) {
           hideSplash();
           clearInterval(checkRoot);
         }
-      }, 50);
+      }, 100);
 
-      // Fallback de segurança
+      // Fallback de segurança: se em 8 segundos nada acontecer, esconde o splash para mostrar erros no console
       setTimeout(() => {
-        hideSplash();
         clearInterval(checkRoot);
-      }, 5000);
+        hideSplash();
+      }, 8000);
     </script>
 </body>
 </html>

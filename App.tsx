@@ -32,12 +32,11 @@ const App: React.FC = () => {
         }
       }
     } catch (e) {
-      console.error("Storage error", e);
+      console.error("Storage initialization error", e);
     }
-    setIsReady(true);
+    // Pequeno atraso para garantir que o DOM esteja pronto para receber o conteúdo
+    setTimeout(() => setIsReady(true), 50);
   }, []);
-
-  if (!isReady) return null;
 
   const activeUser = users.find(u => u.id === activeUserId);
 
@@ -95,6 +94,11 @@ const App: React.FC = () => {
     localStorage.setItem('math-flash-pro-users', JSON.stringify(updatedUsers));
     setGameState('GAMEOVER');
   };
+
+  // Se não estiver pronto, renderiza um container vazio mas presente no DOM para o splash script detectar
+  if (!isReady) {
+    return <div id="app-loading-indicator" className="opacity-0">Loading...</div>;
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center bg-[#0f172a]">

@@ -20,7 +20,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white bg-[#0f172a] opacity-100 transition-opacity duration-500">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white bg-[#0f172a] opacity-100 transition-opacity duration-300">
       <div className="mb-12 text-center">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />
@@ -44,7 +44,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
             <button
               type="submit"
               disabled={name.length < 2}
-              className="absolute right-2 top-2 bottom-2 bg-yellow-400 disabled:bg-white/10 disabled:text-white/20 text-indigo-950 px-4 rounded-xl transition-all font-black"
+              className="absolute right-2 top-2 bottom-2 bg-yellow-400 disabled:bg-white/10 disabled:text-white/20 text-indigo-950 px-4 rounded-xl transition-all font-black flex items-center justify-center"
             >
               <ArrowRight size={20} />
             </button>
