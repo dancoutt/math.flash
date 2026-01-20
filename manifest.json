@@ -1,0 +1,38 @@
+{
+  "name": "Math Flash Pro",
+  "short_name": "Math Flash",
+  "description": "Fast-paced hyper-casual math reaction game. Solve equations in seconds and climb the global ranks!",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait",
+  "categories": ["games", "education", "puzzle"],
+  "shortcuts": [
+    {
+      "name": "Play Now",
+      "short_name": "Play",
+      "description": "Jump straight into the game",
+      "url": "./?mode=play",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/96/5405/5405901.png", "sizes": "96x96" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/192/5405/5405901.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5405/5405901.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5405/5405901.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}

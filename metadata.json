@@ -1,0 +1,5 @@
+{
+  "name": "Math Flash: Hyper-Casual Reaction Puzzle",
+  "description": "A fast-paced hyper-casual math game where you have 3 seconds to decide if an equation is true or false. Features difficulty scaling and a score-based progression system.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,83 @@
+
+import React, { useState } from 'react';
+import { UserPlus, ArrowRight, Brain } from 'lucide-react';
+import { UserProfile } from '../types';
+
+interface AccountEntryProps {
+  onAccountCreated: (name: string) => void;
+  existingUsers: UserProfile[];
+  onSelectUser: (user: UserProfile) => void;
+}
+
+const COLORS = ['bg-rose-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-indigo-500'];
+
+const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingUsers, onSelectUser }) => {
+  const [name, setName] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim().length >= 2) {
+      onAccountCreated(name.trim());
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white animate-in fade-in zoom-in-95 duration-500">
+      <div className="mb-12 text-center">
+        <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
+          <Brain size={48} className="text-yellow-400" />
+        </div>
+        <h1 className="text-4xl font-black italic tracking-tighter">MATH<span className="text-yellow-400">FLASH</span></h1>
+        <p className="text-indigo-200/40 text-[10px] font-black tracking-[0.4em] uppercase">Identity System</p>
+      </div>
+
+      <div className="w-full max-w-sm space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="relative">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter Nickname"
+              maxLength={12}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20"
+            />
+            <button
+              type="submit"
+              disabled={name.length < 2}
+              className="absolute right-2 top-2 bottom-2 bg-yellow-400 disabled:bg-white/10 disabled:text-white/20 text-indigo-950 px-4 rounded-xl transition-all font-black"
+            >
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </form>
+
+        {existingUsers.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/10"></div>
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Switch Profile</span>
+              <div className="h-px flex-1 bg-white/10"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {existingUsers.map(user => (
+                <button
+                  key={user.id}
+                  onClick={() => onSelectUser(user)}
+                  className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs`}>
+                    {user.name[0].toUpperCase()}
+                  </div>
+                  <span className="text-sm font-bold truncate">{user.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AccountEntry;
