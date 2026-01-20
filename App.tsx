@@ -25,11 +25,13 @@ const App: React.FC = () => {
         const saved = localStorage.getItem('math-flash-pro-users');
         if (saved) {
           const parsed = JSON.parse(saved);
-          setUsers(parsed);
-          const lastActive = localStorage.getItem('math-flash-pro-active-id');
-          if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
-            setActiveUserId(lastActive);
-            setGameState('MENU');
+          if (Array.isArray(parsed)) {
+            setUsers(parsed);
+            const lastActive = localStorage.getItem('math-flash-pro-active-id');
+            if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
+              setActiveUserId(lastActive);
+              setGameState('MENU');
+            }
           }
         }
       } catch (e) {
@@ -125,7 +127,7 @@ const App: React.FC = () => {
         )}
 
         {activeUser && (gameState === 'PROFILE' || gameState === 'PRIVACY') && (
-           <div className="absolute inset-0 z-50">
+           <div className="absolute inset-0 z-50 bg-[#0f172a]">
              {gameState === 'PROFILE' && <ProfileView user={activeUser} onBack={() => setGameState('MENU')} />}
              {gameState === 'PRIVACY' && <PrivacyPolicy onBack={() => setGameState('MENU')} />}
            </div>

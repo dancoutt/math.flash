@@ -13,16 +13,10 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   const [name, setName] = useState('');
 
   useEffect(() => {
-    // Notifica o index.html que a tela de nickname está MONTADA e pronta para ser exibida
-    const signalReady = () => {
-      if ((window as any).signalAppReady) {
-        (window as any).signalAppReady();
-      }
-    };
-
-    // Pequeno delay para garantir que a pintura inicial do browser ocorreu
-    const timeout = setTimeout(signalReady, 150);
-    return () => clearTimeout(timeout);
+    // Sinaliza que a tela de login/nickname está pronta
+    if (typeof (window as any).signalAppReady === 'function') {
+      (window as any).signalAppReady();
+    }
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {

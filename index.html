@@ -47,8 +47,8 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.4s ease-out;
-            pointer-events: none; /* Permite clicar no que está atrás durante o fade */
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
         }
 
         .splash-logo {
@@ -148,22 +148,18 @@
       const statusText = document.getElementById('status-text');
       const splash = document.getElementById('splash-screen');
 
-      // Progresso inteligente que desacelera no final esperando o React
       const progressInterval = setInterval(() => {
-        if (progress < 85) {
-          progress += Math.random() * 12;
-        } else if (progress < 98) {
-          progress += 0.5; // Desacelera esperando o sinal real do React
+        if (progress < 90) {
+          progress += Math.random() * 15;
+          if (progress > 90) progress = 90;
+          updateUI();
         }
-        
-        if (progress > 98 && !hasReportedReady) progress = 98;
-        updateUI();
-      }, 120);
+      }, 100);
 
       function updateUI() {
         if (loaderBar) loaderBar.style.width = progress + '%';
-        if (progress > 40 && statusText && progress < 80) statusText.innerText = "Loading UI";
-        if (progress >= 80 && statusText) statusText.innerText = "Finalizing";
+        if (progress > 40 && statusText && progress < 80) statusText.innerText = "Loading Modules";
+        if (progress >= 80 && statusText) statusText.innerText = "Finalizing UI";
       }
 
       window.signalAppReady = () => {
@@ -172,25 +168,21 @@
         clearInterval(progressInterval);
         progress = 100;
         updateUI();
-        if (statusText) statusText.innerText = "Ready";
         
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => {
               splash.style.display = 'none';
-            }, 500);
+            }, 600);
           }
         }, 200);
       };
 
-      // Fallback robusto se o React falhar gravemente
+      // Fallback de segurança caso o React demore muito
       setTimeout(() => {
-        if (!hasReportedReady) {
-          console.warn("React initialization took too long, forcing splash hide.");
-          window.signalAppReady();
-        }
-      }, 6000);
+        if (!hasReportedReady) window.signalAppReady();
+      }, 5000);
     </script>
 </body>
 </html>
