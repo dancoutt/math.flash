@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { UserPlus, ArrowRight, Brain } from 'lucide-react';
+import { ArrowRight, Brain } from 'lucide-react';
 import { UserProfile } from '../types.ts';
 
 interface AccountEntryProps {
@@ -20,7 +20,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white animate-in fade-in zoom-in-95 duration-500 bg-[#0f172a]">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white bg-[#0f172a] opacity-100 transition-opacity duration-500">
       <div className="mb-12 text-center">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />
@@ -38,7 +38,8 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter Nickname"
               maxLength={12}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20"
+              autoFocus
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20 text-white"
             />
             <button
               type="submit"
@@ -51,23 +52,21 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
         </form>
 
         {existingUsers.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4 border-t border-white/5">
             <div className="flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/10"></div>
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Switch Profile</span>
-              <div className="h-px flex-1 bg-white/10"></div>
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Quick Switch</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {existingUsers.map(user => (
                 <button
                   key={user.id}
                   onClick={() => onSelectUser(user)}
-                  className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all"
+                  className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all text-left"
                 >
-                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs`}>
+                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs shrink-0`}>
                     {user.name[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-bold truncate">{user.name}</span>
+                  <span className="text-xs font-bold truncate text-white/80">{user.name}</span>
                 </button>
               ))}
             </div>

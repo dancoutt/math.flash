@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [score, setScore] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [canRevive, setCanRevive] = useState(true);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -34,19 +34,10 @@ const App: React.FC = () => {
     } catch (e) {
       console.error("Storage error", e);
     }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
+    setIsReady(true);
   }, []);
 
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setDeferredPrompt(null);
-  };
+  if (!isReady) return null;
 
   const activeUser = users.find(u => u.id === activeUserId);
 
@@ -106,10 +97,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen relative flex flex-col items-center bg-[#0f172a]">
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-      
-      <main className="relative z-10 w-full max-w-md min-h-screen flex flex-col shadow-2xl overflow-hidden bg-[#0f172a]">
+    <div className="w-full min-h-screen flex flex-col items-center bg-[#0f172a]">
+      <main className="w-full max-w-md min-h-screen flex flex-col relative bg-[#0f172a]">
         {gameState === 'AUTH' && (
           <AccountEntry 
             onAccountCreated={handleAccountCreated} 
@@ -127,7 +116,6 @@ const App: React.FC = () => {
             onViewProfile={() => setGameState('PROFILE')}
             onViewPrivacy={() => setGameState('PRIVACY')}
             onLogout={handleLogout}
-            onInstall={deferredPrompt ? handleInstallClick : undefined}
           />
         )}
 
