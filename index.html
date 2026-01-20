@@ -32,7 +32,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: white;
             touch-action: manipulation;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         #root {
@@ -110,32 +110,45 @@
 
     <div id="root"></div>
 
-    <script type="module" src="./index.tsx"></script>
+    <!-- Script principal com tratamento de erro -->
+    <script type="module">
+        import './index.tsx';
+        console.log('Main module requested');
+    </script>
 
     <script>
+      // Capturador de erros global para ajudar no debug do GitHub Pages
+      window.onerror = function(msg, url, line) {
+        console.error("Global Error: " + msg + "\nURL: " + url + "\nLine: " + line);
+        return false;
+      };
+
       function hideSplash() {
         const splash = document.getElementById('splash-screen');
-        if (splash && splash.style.visibility !== 'hidden') {
+        if (splash) {
           splash.style.opacity = '0';
           setTimeout(() => {
             splash.style.visibility = 'hidden';
+            splash.style.display = 'none';
           }, 500);
         }
       }
 
+      // Verifica se o React montou o conteúdo
       const checkInterval = setInterval(() => {
         const root = document.getElementById('root');
-        if (root && root.innerHTML.trim().length > 0) {
+        if (root && root.children.length > 0) {
+          console.log('App detected in root, hiding splash');
           hideSplash();
           clearInterval(checkInterval);
         }
       }, 100);
 
-      // Aumentado um pouco o tempo limite para conexões lentas
+      // Fallback: se em 6 segundos não carregar, esconde o splash de qualquer forma
       setTimeout(() => {
-        hideSplash();
         clearInterval(checkInterval);
-      }, 5000);
+        hideSplash();
+      }, 6000);
     </script>
 </body>
 </html>
