@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { GameState, Difficulty, UserProfile, GameResult } from './types.ts';
-import Menu from './components/Menu.tsx';
-import GameBoard from './components/GameBoard.tsx';
-import GameOver from './components/GameOver.tsx';
-import AccountEntry from './components/AccountEntry.tsx';
-import ProfileView from './components/ProfileView.tsx';
-import PrivacyPolicy from './components/PrivacyPolicy.tsx';
+import { GameState, Difficulty, UserProfile, GameResult } from './types';
+import Menu from './components/Menu';
+import GameBoard from './components/GameBoard';
+import GameOver from './components/GameOver';
+import AccountEntry from './components/AccountEntry';
+import ProfileView from './components/ProfileView';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 const AVATAR_COLORS = ['bg-rose-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-indigo-500'];
 
@@ -20,10 +20,9 @@ const App: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
-    // Carregar usuários
-    const saved = localStorage.getItem('math-flash-pro-users');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('math-flash-pro-users');
+      if (saved) {
         const parsed = JSON.parse(saved);
         setUsers(parsed);
         const lastActive = localStorage.getItem('math-flash-pro-active-id');
@@ -31,12 +30,11 @@ const App: React.FC = () => {
           setActiveUserId(lastActive);
           setGameState('MENU');
         }
-      } catch (e) {
-        console.error("Failed to parse users", e);
       }
+    } catch (e) {
+      console.error("Storage error", e);
     }
 
-    // Capturar evento de instalação
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -47,9 +45,7 @@ const App: React.FC = () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-    }
+    if (outcome === 'accepted') setDeferredPrompt(null);
   };
 
   const activeUser = users.find(u => u.id === activeUserId);
@@ -91,43 +87,29 @@ const App: React.FC = () => {
 
   const endGame = () => {
     if (!activeUser) return;
-
-    const result: GameResult = {
-      score,
-      difficulty,
-      timestamp: Date.now()
-    };
-
+    const result: GameResult = { score, difficulty, timestamp: Date.now() };
     const updatedUsers = users.map(u => {
       if (u.id === activeUser.id) {
-        const newHistory = [...u.history, result].slice(-10);
         const newHighScore = Math.max(u.highScores[difficulty], score);
         return {
           ...u,
-          history: newHistory,
+          history: [...u.history, result].slice(-10),
           highScores: { ...u.highScores, [difficulty]: newHighScore },
           totalSolved: u.totalSolved + score
         };
       }
       return u;
     });
-
     setUsers(updatedUsers);
     localStorage.setItem('math-flash-pro-users', JSON.stringify(updatedUsers));
     setGameState('GAMEOVER');
   };
 
-  const handleRevive = () => {
-    setCanRevive(false);
-    setGameState('PLAYING');
-  };
-
   return (
-    <div className="w-full min-h-screen relative overflow-x-hidden flex flex-col items-center bg-[#0f172a]">
-      {/* Carbon fiber overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] z-0"></div>
+    <div className="w-full min-h-screen relative flex flex-col items-center bg-[#0f172a]">
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
       
-      <main className="relative z-10 w-full max-w-md min-h-screen flex flex-col bg-transparent ring-1 ring-white/5 shadow-2xl overflow-hidden">
+      <main className="relative z-10 w-full max-w-md min-h-screen flex flex-col shadow-2xl overflow-hidden">
         {gameState === 'AUTH' && (
           <AccountEntry 
             onAccountCreated={handleAccountCreated} 
@@ -150,16 +132,11 @@ const App: React.FC = () => {
         )}
 
         {activeUser && gameState === 'PROFILE' && (
-          <ProfileView 
-            user={activeUser}
-            onBack={() => setGameState('MENU')}
-          />
+          <ProfileView user={activeUser} onBack={() => setGameState('MENU')} />
         )}
 
         {activeUser && gameState === 'PRIVACY' && (
-          <PrivacyPolicy 
-            onBack={() => setGameState('MENU')}
-          />
+          <PrivacyPolicy onBack={() => setGameState('MENU')} />
         )}
 
         {gameState === 'PLAYING' && (
@@ -178,7 +155,7 @@ const App: React.FC = () => {
             highScore={activeUser?.highScores[difficulty] || 0} 
             onRestart={startGame} 
             onMenu={() => setGameState('MENU')}
-            onRevive={handleRevive}
+            onRevive={() => { setCanRevive(false); setGameState('PLAYING'); }}
             canRevive={canRevive}
           />
         )}
