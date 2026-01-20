@@ -20,7 +20,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a] opacity-100 relative z-10">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a]">
       <div className="mb-12 text-center">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />

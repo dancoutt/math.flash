@@ -33,10 +33,13 @@ const App: React.FC = () => {
           }
         }
       } catch (e) {
-        console.error("Storage initialization error", e);
+        console.error("Storage error:", e);
       } finally {
-        // Garante que o estado isReady seja setado para permitir a renderização do root
         setIsReady(true);
+        // Notifica o index.html que o React está pronto para assumir
+        if ((window as any).markAppAsReady) {
+          setTimeout(() => (window as any).markAppAsReady(), 100);
+        }
       }
     };
 
@@ -100,14 +103,11 @@ const App: React.FC = () => {
     setGameState('GAMEOVER');
   };
 
-  // Se não estiver pronto, renderizamos um elemento mínimo para que o MutationObserver detecte atividade
-  if (!isReady) {
-    return <div id="app-loading-sentinel"></div>;
-  }
+  if (!isReady) return null;
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center bg-[#0f172a] overflow-hidden">
-      <main className="w-full max-w-md min-h-screen flex flex-col relative bg-[#0f172a]">
+    <div className="w-full min-h-screen bg-[#0f172a] overflow-hidden flex flex-col items-center">
+      <main className="w-full max-w-md min-h-screen relative bg-[#0f172a]">
         {gameState === 'AUTH' && (
           <AccountEntry 
             onAccountCreated={handleAccountCreated} 
