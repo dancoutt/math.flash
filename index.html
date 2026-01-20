@@ -46,7 +46,7 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .splash-logo {
@@ -59,6 +59,28 @@
             justify-content: center;
             margin-bottom: 24px;
             border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Barra de Carregamento */
+        .loader-container {
+            width: 140px;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-top: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #loader-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            transition: width 0.3s ease-out;
         }
 
         .bg-mesh {
@@ -107,6 +129,11 @@
         <div style="font-weight: 800; font-style: italic; letter-spacing: -0.05em; font-size: 24px; color: white;">
             MATH<span style="color: #fbbf24;">FLASH</span>
         </div>
+        
+        <div class="loader-container">
+            <div id="loader-bar"></div>
+        </div>
+        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Initializing Core</div>
     </div>
 
     <div id="root"></div>
@@ -114,19 +141,47 @@
     <script type="module" src="./index.tsx"></script>
 
     <script>
-      const hideSplash = () => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-          splash.style.opacity = '0';
-          setTimeout(() => splash.style.display = 'none', 500);
+      let progress = 0;
+      let appReady = false;
+      const loaderBar = document.getElementById('loader-bar');
+      const statusText = document.getElementById('status-text');
+      const splash = document.getElementById('splash-screen');
+
+      // Simulação de progresso de carregamento de assets
+      const interval = setInterval(() => {
+        if (progress < 90) {
+          progress += Math.random() * 15;
+          if (progress > 90) progress = 90;
+          updateProgress();
         }
+      }, 200);
+
+      function updateProgress() {
+        if (loaderBar) loaderBar.style.width = `${progress}%`;
+        if (progress > 40 && statusText) statusText.innerText = "Loading Modules";
+        if (progress > 70 && statusText) statusText.innerText = "Setting Up UI";
+      }
+
+      const finishLoading = () => {
+        progress = 100;
+        updateProgress();
+        if (statusText) statusText.innerText = "Ready";
+        
+        setTimeout(() => {
+          if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 600);
+          }
+        }, 300);
       };
 
-      // Observador para detectar quando o React renderiza
+      // Observador para o React
       const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.addedNodes.length > 0) {
-            hideSplash();
+            appReady = true;
+            clearInterval(interval);
+            finishLoading();
             observer.disconnect();
             break;
           }
@@ -138,8 +193,13 @@
         observer.observe(root, { childList: true });
       }
 
-      // Fallback
-      setTimeout(hideSplash, 6000);
+      // Fallback robusto
+      setTimeout(() => {
+        if (!appReady) {
+          console.warn("Manual override: Splash hidden by timeout");
+          finishLoading();
+        }
+      }, 5000);
     </script>
 </body>
 </html>

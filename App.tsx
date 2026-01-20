@@ -20,22 +20,27 @@ const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('math-flash-pro-users');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setUsers(parsed);
-        const lastActive = localStorage.getItem('math-flash-pro-active-id');
-        if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
-          setActiveUserId(lastActive);
-          setGameState('MENU');
+    const initializeApp = async () => {
+      try {
+        const saved = localStorage.getItem('math-flash-pro-users');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setUsers(parsed);
+          const lastActive = localStorage.getItem('math-flash-pro-active-id');
+          if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
+            setActiveUserId(lastActive);
+            setGameState('MENU');
+          }
         }
+      } catch (e) {
+        console.error("Storage initialization error", e);
+      } finally {
+        // Garante que o estado isReady seja setado para permitir a renderização do root
+        setIsReady(true);
       }
-    } catch (e) {
-      console.error("Storage initialization error", e);
-    }
-    // Pequeno atraso para garantir que o DOM esteja pronto para receber o conteúdo
-    setTimeout(() => setIsReady(true), 50);
+    };
+
+    initializeApp();
   }, []);
 
   const activeUser = users.find(u => u.id === activeUserId);
@@ -95,13 +100,13 @@ const App: React.FC = () => {
     setGameState('GAMEOVER');
   };
 
-  // Se não estiver pronto, renderiza um container vazio mas presente no DOM para o splash script detectar
+  // Se não estiver pronto, renderizamos um elemento mínimo para que o MutationObserver detecte atividade
   if (!isReady) {
-    return <div id="app-loading-indicator" className="opacity-0">Loading...</div>;
+    return <div id="app-loading-sentinel"></div>;
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center bg-[#0f172a]">
+    <div className="w-full min-h-screen flex flex-col items-center bg-[#0f172a] overflow-hidden">
       <main className="w-full max-w-md min-h-screen flex flex-col relative bg-[#0f172a]">
         {gameState === 'AUTH' && (
           <AccountEntry 
