@@ -25,7 +25,7 @@ const App: React.FC = () => {
         const saved = localStorage.getItem('math-flash-pro-users');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             setUsers(parsed);
             const lastActive = localStorage.getItem('math-flash-pro-active-id');
             if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
@@ -35,8 +35,9 @@ const App: React.FC = () => {
           }
         }
       } catch (e) {
-        console.error("Storage error:", e);
+        console.error("Storage initialization error:", e);
       } finally {
+        // Garante que o App sempre saia do estado de loading após a tentativa de carregar dados
         setIsReady(true);
       }
     };
@@ -101,6 +102,7 @@ const App: React.FC = () => {
     setGameState('GAMEOVER');
   };
 
+  // Se o App não estiver pronto, não renderizamos nada para o Splash continuar visível
   if (!isReady) return null;
 
   return (

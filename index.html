@@ -35,6 +35,8 @@
             width: 100%;
             display: block;
             background-color: #0f172a;
+            position: relative;
+            z-index: 1;
         }
 
         #splash-screen {
@@ -47,7 +49,7 @@
             justify-content: center;
             z-index: 9999;
             opacity: 1;
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
         }
 
@@ -81,7 +83,7 @@
             width: 0%;
             background: #fbbf24;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-            transition: width 0.2s ease-out;
+            transition: width 0.3s ease-out;
         }
 
         .bg-mesh {
@@ -134,7 +136,7 @@
         <div class="loader-container">
             <div id="loader-bar"></div>
         </div>
-        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Connecting System...</div>
+        <div id="status-text" style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; margin-top: 12px;">Initializing App...</div>
     </div>
 
     <div id="root"></div>
@@ -148,13 +150,14 @@
       const statusText = document.getElementById('status-text');
       const splash = document.getElementById('splash-screen');
 
+      // Progresso falso inicial para dar feedback visual imediato
       const progressInterval = setInterval(() => {
         if (progress < 90) {
-          progress += Math.random() * 15;
+          progress += Math.random() * 10;
           if (progress > 90) progress = 90;
           updateUI();
         }
-      }, 100);
+      }, 150);
 
       function updateUI() {
         if (loaderBar) loaderBar.style.width = progress + '%';
@@ -169,20 +172,22 @@
         progress = 100;
         updateUI();
         
+        // Pequeno atraso para garantir que o React renderizou o campo de login por baixo
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => {
               splash.style.display = 'none';
+              splash.remove(); // Remove do DOM para garantir que não bloqueie nada
             }, 600);
           }
-        }, 200);
+        }, 300);
       };
 
-      // Fallback de segurança caso o React demore muito
+      // Fallback robusto
       setTimeout(() => {
         if (!hasReportedReady) window.signalAppReady();
-      }, 5000);
+      }, 6000);
     </script>
 </body>
 </html>
