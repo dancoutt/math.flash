@@ -36,15 +36,10 @@ const App: React.FC = () => {
       }
     }
 
-    // Capturar evento de instalação para o Botão no Menu
+    // Capturar evento de instalação
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-    });
-
-    window.addEventListener('appinstalled', () => {
-      setDeferredPrompt(null);
-      console.log('PWA instalado com sucesso');
     });
   }, []);
 
@@ -127,22 +122,21 @@ const App: React.FC = () => {
     setGameState('PLAYING');
   };
 
-  if (gameState === 'AUTH') {
-    return <AccountEntry 
-      onAccountCreated={handleAccountCreated} 
-      existingUsers={users}
-      onSelectUser={handleSelectUser}
-    />;
-  }
-
-  if (!activeUser) return null;
-
   return (
-    <div className="max-w-md mx-auto h-screen min-h-screen bg-transparent shadow-2xl overflow-hidden relative prevent-select select-none ring-1 ring-white/5">
+    <div className="w-full h-full min-h-screen relative overflow-hidden flex flex-col items-center">
+      {/* Carbon fiber overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] z-0"></div>
       
-      <div className="relative z-10 h-full">
-        {gameState === 'MENU' && (
+      <main className="relative z-10 w-full max-w-md h-full flex flex-col bg-transparent ring-1 ring-white/5 shadow-2xl overflow-hidden">
+        {gameState === 'AUTH' && (
+          <AccountEntry 
+            onAccountCreated={handleAccountCreated} 
+            existingUsers={users}
+            onSelectUser={handleSelectUser}
+          />
+        )}
+
+        {activeUser && gameState === 'MENU' && (
           <Menu 
             onStart={startGame} 
             difficulty={difficulty} 
@@ -155,14 +149,14 @@ const App: React.FC = () => {
           />
         )}
 
-        {gameState === 'PROFILE' && (
+        {activeUser && gameState === 'PROFILE' && (
           <ProfileView 
             user={activeUser}
             onBack={() => setGameState('MENU')}
           />
         )}
 
-        {gameState === 'PRIVACY' && (
+        {activeUser && gameState === 'PRIVACY' && (
           <PrivacyPolicy 
             onBack={() => setGameState('MENU')}
           />
@@ -174,21 +168,21 @@ const App: React.FC = () => {
             onGameOver={endGame} 
             score={score} 
             setScore={setScore} 
-            highScore={activeUser.highScores[difficulty]}
+            highScore={activeUser?.highScores[difficulty] || 0}
           />
         )}
 
         {gameState === 'GAMEOVER' && (
           <GameOver 
             score={score} 
-            highScore={activeUser.highScores[difficulty]} 
+            highScore={activeUser?.highScores[difficulty] || 0} 
             onRestart={startGame} 
             onMenu={() => setGameState('MENU')}
             onRevive={handleRevive}
             canRevive={canRevive}
           />
         )}
-      </div>
+      </main>
     </div>
   );
 };

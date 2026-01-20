@@ -1,7 +1,9 @@
+
 const CACHE_NAME = 'math-flash-pro-v2';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
+  './',
+  'index.html',
+  'manifest.json',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
   'https://cdn-icons-png.flaticon.com/512/5405/5405901.png'
@@ -32,15 +34,16 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event - Stale While Revalidate Strategy
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin ads and tracking requests
-  if (!event.request.url.startsWith(self.location.origin) && !STATIC_ASSETS.includes(event.request.url)) {
+  // Ignorar requisições de anúncios e telemetria externa
+  if (!event.request.url.startsWith(self.location.origin) && 
+      !event.request.url.includes('fonts.googleapis.com') && 
+      !event.request.url.includes('cdn.tailwindcss.com')) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Update the cache with the new response
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -48,9 +51,10 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
+      }).catch(() => {
+        // Fallback para offline se necessário
       });
 
-      // Return cached version immediately, or wait for network if not in cache
       return cachedResponse || fetchPromise;
     })
   );

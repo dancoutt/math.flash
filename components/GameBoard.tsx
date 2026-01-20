@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Check, X, Zap, AlertTriangle, Star, Award } from 'lucide-react';
 import { Equation, Difficulty } from '../types';
@@ -35,7 +36,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       
       const newScore = score + increment;
       
-      // Check for new record during gameplay
       if (newScore > highScore && !hasBrokenRecord && highScore > 0) {
         setHasBrokenRecord(true);
         soundEngine.playRecord();
@@ -44,18 +44,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       setScore(newScore);
       setEquation(generateEquation(newScore, difficulty));
       
-      // Feedback for bonus
       if (bonus > 0) {
         setShowBonus(true);
         setTimeout(() => setShowBonus(false), 500);
       }
       
       const isFast = timeLeft > (baseTime * 0.6);
-      const timeBonus = isFast ? baseTime * 0.12 : 200;
+      const timeBonus = isFast ? baseTime * 0.15 : 300; // Aumentado um pouco o bônus de tempo
       setTimeLeft(Math.min(baseTime, timeLeft + timeBonus));
       
       setCombo(nextCombo);
       setFeedback('correct');
+      
+      // Pequeno efeito de vibração suave no acerto se disponível
+      if (navigator.vibrate) navigator.vibrate(10);
+      
       setTimeout(() => setFeedback(null), 300);
     } else {
       soundEngine.playError();
@@ -176,7 +179,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-        <div className={`text-center ${feedback === 'correct' ? 'animate-pop' : ''}`}>
+        <div className={`text-center transition-transform duration-200 ${feedback === 'correct' ? 'scale-110 animate-pop' : 'scale-100'}`}>
           <div className="text-white/20 text-4xl font-black mb-2 italic tracking-tight">{equation.text}</div>
           <div className={`text-[8rem] font-black drop-shadow-2xl tracking-tighter leading-none transition-colors duration-200
             ${feedback === 'correct' ? 'text-green-400' : isUrgent ? 'text-red-200' : 'text-white'}`}>
