@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { GameState, Difficulty, UserProfile, GameResult } from './types';
-import Menu from './components/Menu';
-import GameBoard from './components/GameBoard';
-import GameOver from './components/GameOver';
-import AccountEntry from './components/AccountEntry';
-import ProfileView from './components/ProfileView';
-import PrivacyPolicy from './components/PrivacyPolicy';
+import { GameState, Difficulty, UserProfile, GameResult } from './types.ts';
+import Menu from './components/Menu.tsx';
+import GameBoard from './components/GameBoard.tsx';
+import GameOver from './components/GameOver.tsx';
+import AccountEntry from './components/AccountEntry.tsx';
+import ProfileView from './components/ProfileView.tsx';
+import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 
 const AVATAR_COLORS = ['bg-rose-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-indigo-500'];
 
@@ -26,7 +26,7 @@ const App: React.FC = () => {
         const parsed = JSON.parse(saved);
         setUsers(parsed);
         const lastActive = localStorage.getItem('math-flash-pro-active-id');
-        if (lastActive && parsed.some((u: UserProfile) => u.id === lastActive)) {
+        if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
           setActiveUserId(lastActive);
           setGameState('MENU');
         }
@@ -109,7 +109,7 @@ const App: React.FC = () => {
     <div className="w-full min-h-screen relative flex flex-col items-center bg-[#0f172a]">
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
       
-      <main className="relative z-10 w-full max-w-md min-h-screen flex flex-col shadow-2xl overflow-hidden">
+      <main className="relative z-10 w-full max-w-md min-h-screen flex flex-col shadow-2xl overflow-hidden bg-[#0f172a]">
         {gameState === 'AUTH' && (
           <AccountEntry 
             onAccountCreated={handleAccountCreated} 
