@@ -26,17 +26,17 @@
             margin: 0;
             padding: 0;
             background-color: #0f172a;
-            overflow: hidden;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: white;
             touch-action: manipulation;
+            overflow-x: hidden;
         }
 
         #root {
-            height: 100%;
+            min-height: 100vh;
             width: 100%;
             display: block;
         }
@@ -50,7 +50,9 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease-out, visibility 0.5s;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.4s ease-out, visibility 0.4s;
         }
 
         .splash-logo {
@@ -70,12 +72,6 @@
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.05); opacity: 0.8; }
             100% { transform: scale(1); opacity: 1; }
-        }
-
-        .prevent-select {
-          -webkit-user-select: none;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
         }
 
         @keyframes shake {
@@ -99,7 +95,7 @@
         .animate-pop { animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
         .bg-mesh {
-          background-color: #1e1b4b;
+          background-color: #0f172a;
           background-image: 
             radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
             radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
@@ -137,29 +133,31 @@
 
     <div id="root"></div>
 
-    <!-- CHAMADA CRÍTICA PARA O SCRIPT DO RECT -->
     <script type="module" src="./index.tsx"></script>
 
     <script>
-      window.addEventListener('load', () => {
-        // Aguarda o React montar antes de esconder o splash
-        const checkReactInterval = setInterval(() => {
-          const root = document.getElementById('root');
-          if (root && root.children.length > 0) {
-            setTimeout(() => {
-              const splash = document.getElementById('splash-screen');
-              if (splash) {
-                splash.style.opacity = '0';
-                setTimeout(() => {
-                  splash.style.visibility = 'hidden';
-                }, 500);
-              }
-            }, 500);
-            clearInterval(checkReactInterval);
-          }
-        }, 100);
-      });
+      // Função robusta para esconder o splash
+      function hideSplash() {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => {
+            splash.style.visibility = 'hidden';
+          }, 400);
+        }
+      }
 
+      // Verifica se o React montou a cada 100ms
+      const checkReactInterval = setInterval(() => {
+        const root = document.getElementById('root');
+        if (root && root.children.length > 0) {
+          clearInterval(checkReactInterval);
+          // Pequeno delay para garantir que o primeiro render foi processado
+          setTimeout(hideSplash, 200);
+        }
+      }, 100);
+
+      // Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js')
