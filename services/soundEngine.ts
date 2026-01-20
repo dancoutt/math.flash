@@ -1,3 +1,4 @@
+
 /**
  * Math Flash Pro - Procedural Sound Engine
  * Generates sounds using Web Audio API to avoid external asset dependencies.
@@ -5,19 +6,45 @@
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
+  private isMuted: boolean = false;
 
-  private init() {
+  /**
+   * Initializes or resumes the AudioContext.
+   * Must be called inside a user interaction handler (click/touch).
+   */
+  public async init() {
+    if (this.isMuted) return;
+
     if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        this.ctx = new AudioContextClass();
+      } catch (e) {
+        console.warn('AudioContext not supported', e);
+        return;
+      }
     }
-    if (this.ctx.state === 'suspended') {
+
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {
+        console.warn('Failed to resume AudioContext', e);
+      }
+    }
+  }
+
+  public setMute(mute: boolean) {
+    this.isMuted = mute;
+    if (mute && this.ctx) {
+      this.ctx.suspend();
+    } else if (!mute && this.ctx) {
       this.ctx.resume();
     }
   }
 
   playTick(isUrgent: boolean = false) {
-    this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -37,8 +64,7 @@ class SoundEngine {
   }
 
   playSuccess() {
-    this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -58,8 +84,7 @@ class SoundEngine {
   }
 
   playRecord() {
-    this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -82,8 +107,7 @@ class SoundEngine {
   }
 
   playError() {
-    this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +27,8 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: white;
             touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #root {
@@ -134,26 +135,16 @@
 
     <div id="root"></div>
 
-    <script type="module" src="./index.tsx"></script>
-
+    <!-- Define signalAppReady globally before modules load -->
     <script>
-      let progress = 0;
       let hasReportedReady = false;
-      const loaderBar = document.getElementById('loader-bar');
-      const splash = document.getElementById('splash-screen');
-
-      const progressInterval = setInterval(() => {
-        if (progress < 90) {
-          progress += Math.random() * 20;
-          if (progress > 90) progress = 90;
-          if (loaderBar) loaderBar.style.width = progress + '%';
-        }
-      }, 100);
-
       window.signalAppReady = () => {
         if (hasReportedReady) return;
         hasReportedReady = true;
-        clearInterval(progressInterval);
+        
+        const loaderBar = document.getElementById('loader-bar');
+        const splash = document.getElementById('splash-screen');
+        
         if (loaderBar) loaderBar.style.width = '100%';
         
         setTimeout(() => {
@@ -164,13 +155,39 @@
               splash.remove();
             }, 400);
           }
-        }, 100);
+        }, 200);
       };
 
-      // Fallback agressivo de 2.5 segundos para garantir que o splash não esconda o login
+      // Error handler fallback: if scripts fail, remove splash so user sees error/blank instead of loader
+      window.onerror = function() {
+        console.error("Global script error detected, forcing splash removal.");
+        window.signalAppReady();
+      };
+    </script>
+
+    <script type="module" src="./index.tsx"></script>
+
+    <script>
+      let progress = 0;
+      const loaderBar = document.getElementById('loader-bar');
+      
+      const progressInterval = setInterval(() => {
+        if (progress < 90 && !hasReportedReady) {
+          progress += Math.random() * 15;
+          if (progress > 90) progress = 90;
+          if (loaderBar) loaderBar.style.width = progress + '%';
+        } else {
+          clearInterval(progressInterval);
+        }
+      }, 100);
+
+      // Safety timeout: remove splash after 3s even if React doesn't load properly
       setTimeout(() => {
-        if (!hasReportedReady) window.signalAppReady();
-      }, 2500);
+        if (!hasReportedReady) {
+          console.warn("Safety timeout triggered splash removal.");
+          window.signalAppReady();
+        }
+      }, 3000);
     </script>
 </body>
 </html>

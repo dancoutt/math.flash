@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Brain } from 'lucide-react';
 import { UserProfile } from '../types.ts';
+import { soundEngine } from '../services/soundEngine.ts';
 
 interface AccountEntryProps {
   onAccountCreated: (name: string) => void;
@@ -19,15 +20,24 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
     }
   }, []);
 
+  const handleInteraction = () => {
+    // Tenta inicializar o som na primeira interação real
+    soundEngine.init();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    handleInteraction();
     if (name.trim().length >= 2) {
       onAccountCreated(name.trim());
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a]">
+    <div 
+      className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a]"
+      onClick={handleInteraction}
+    >
       <div className="mb-12 text-center animate-in fade-in zoom-in duration-700">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />
@@ -47,6 +57,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onFocus={handleInteraction}
               placeholder="Enter Nickname"
               maxLength={12}
               autoFocus
@@ -71,7 +82,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
               {existingUsers.map(user => (
                 <button
                   key={user.id}
-                  onClick={() => onSelectUser(user)}
+                  onClick={() => { handleInteraction(); onSelectUser(user); }}
                   className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all text-left"
                 >
                   <div className={`w-8 h-8 rounded-lg ${user.avatarColor} flex items-center justify-center font-black text-xs shrink-0 text-white`}>
