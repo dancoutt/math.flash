@@ -88,7 +88,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.474.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.474.0?external=react,react-dom",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -125,16 +125,17 @@
 
       const checkInterval = setInterval(() => {
         const root = document.getElementById('root');
-        if (root && root.innerHTML.length > 0) {
+        if (root && root.innerHTML.trim().length > 0) {
           hideSplash();
           clearInterval(checkInterval);
         }
       }, 100);
 
+      // Aumentado um pouco o tempo limite para conexões lentas
       setTimeout(() => {
         hideSplash();
         clearInterval(checkInterval);
-      }, 3500);
+      }, 5000);
     </script>
 </body>
 </html>

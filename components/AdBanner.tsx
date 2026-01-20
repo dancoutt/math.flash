@@ -1,11 +1,10 @@
 
 import React, { useEffect } from 'react';
-import { AD_UNITS } from '../services/adService';
+import { AD_UNITS } from '../services/adService.ts';
 
 const AdBanner: React.FC = () => {
   useEffect(() => {
     try {
-      // Standard Google AdSense/AdMob push initialization for the banner unit
       // @ts-ignore
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
@@ -13,12 +12,8 @@ const AdBanner: React.FC = () => {
     }
   }, []);
 
-  // Extract publisher ID and slot ID from the constant
-  // Format: ca-app-pub-2481591040076861/placeholder-banner
   const fullId = AD_UNITS.BANNER_MENU;
   const parts = fullId.split('/');
-  
-  // The client ID usually starts with ca-pub- for the adsbygoogle tag
   const clientId = parts[0].replace('ca-app-', 'ca-');
   const slotId = parts[1];
 

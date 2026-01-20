@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Home, PlayCircle, Loader2, Share2, Award } from 'lucide-react';
-import { showRewardedAd } from '../services/adService';
+import { showRewardedAd } from '../services/adService.ts';
 
 interface GameOverProps {
   score: number;
@@ -72,7 +73,6 @@ const GameOver: React.FC<GameOverProps> = ({ score, highScore, onRestart, onMenu
 
   const isNewHighScore = score > 0 && score === highScore;
   
-  // Fake rank logic that scales with score to feel rewarding
   const calculatedRank = score > 0 
     ? Math.max(1, Math.floor(1000000 / (score * score + 1))).toLocaleString()
     : '---';
