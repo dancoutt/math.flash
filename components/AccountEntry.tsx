@@ -1,15 +1,13 @@
 
 import React, { useState } from 'react';
 import { UserPlus, ArrowRight, Brain } from 'lucide-react';
-import { UserProfile } from '../types';
+import { UserProfile } from '../types.ts';
 
 interface AccountEntryProps {
   onAccountCreated: (name: string) => void;
   existingUsers: UserProfile[];
   onSelectUser: (user: UserProfile) => void;
 }
-
-const COLORS = ['bg-rose-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-indigo-500'];
 
 const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingUsers, onSelectUser }) => {
   const [name, setName] = useState('');
@@ -22,7 +20,7 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white animate-in fade-in zoom-in-95 duration-500">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white animate-in fade-in zoom-in-95 duration-500 bg-[#0f172a]">
       <div className="mb-12 text-center">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-float">
           <Brain size={48} className="text-yellow-400" />

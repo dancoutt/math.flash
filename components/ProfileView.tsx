@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { ChevronLeft, Trophy, Activity, Target, Star, Award } from 'lucide-react';
-import { UserProfile, Difficulty } from '../types';
+import { UserProfile, Difficulty } from '../types.ts';
 
 interface ProfileViewProps {
   user: UserProfile;
