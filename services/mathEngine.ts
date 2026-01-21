@@ -1,4 +1,3 @@
-
 import { Equation, Difficulty } from '../types.ts';
 
 export const generateEquation = (score: number, difficulty: Difficulty): Equation => {

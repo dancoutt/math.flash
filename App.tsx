@@ -27,7 +27,7 @@ const App: React.FC = () => {
           if (Array.isArray(parsed) && parsed.length > 0) {
             setUsers(parsed);
             const lastActive = localStorage.getItem('math-flash-pro-active-id');
-            if (lastActive && parsed.some((u: any) => u.id === lastActive)) {
+            if (lastActive && parsed.some((u: UserProfile) => u.id === lastActive)) {
               setActiveUserId(lastActive);
               setGameState('MENU');
             }

@@ -140,9 +140,12 @@
       window.signalAppReady = () => {
         if (hasReportedReady) return;
         hasReportedReady = true;
+        
         const loaderBar = document.getElementById('loader-bar');
         const splash = document.getElementById('splash-screen');
+        
         if (loaderBar) loaderBar.style.width = '100%';
+        
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
@@ -153,6 +156,8 @@
           }
         }, 200);
       };
+
+      // Error handler fallback
       window.onerror = function() {
         window.signalAppReady();
       };
@@ -165,16 +170,18 @@
       const loaderBar = document.getElementById('loader-bar');
       const progressInterval = setInterval(() => {
         if (progress < 90 && !hasReportedReady) {
-          progress += Math.random() * 15;
+          progress += Math.random() * 10;
           if (progress > 90) progress = 90;
           if (loaderBar) loaderBar.style.width = progress + '%';
         } else {
           clearInterval(progressInterval);
         }
-      }, 100);
+      }, 150);
+
+      // Safety timeout
       setTimeout(() => {
         if (!hasReportedReady) window.signalAppReady();
-      }, 3000);
+      }, 4000);
     </script>
 </body>
 </html>

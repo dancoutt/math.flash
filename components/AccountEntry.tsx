@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Brain } from 'lucide-react';
+import { ArrowRight, Brain, UserCircle2 } from 'lucide-react';
 import { UserProfile } from '../types.ts';
 import { soundEngine } from '../services/soundEngine.ts';
 
@@ -11,6 +11,7 @@ interface AccountEntryProps {
 
 const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingUsers, onSelectUser }) => {
   const [name, setName] = useState('');
+  const [showExisting, setShowExisting] = useState(false);
   const isAudioInit = useRef(false);
 
   useEffect(() => {
@@ -26,8 +27,8 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     handleInteraction();
     const trimmedName = name.trim();
     if (trimmedName.length >= 2) {
@@ -52,46 +53,59 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
         </p>
       </div>
 
-      <div className="w-full max-w-sm space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onFocus={handleInteraction}
-              placeholder="Enter Nickname"
-              maxLength={12}
-              autoFocus
-              inputMode="text"
-              className="w-full bg-white/10 border border-white/20 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20 text-white"
-            />
-            <button
-              type="submit"
-              disabled={name.trim().length < 2}
-              className="absolute right-2 top-2 bottom-2 bg-yellow-400 disabled:bg-white/10 disabled:text-white/20 text-indigo-950 px-4 rounded-xl active:scale-95 transition-all font-black flex items-center justify-center"
-            >
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        </form>
-
-        {existingUsers.length > 0 && (
-          <div className="space-y-4 pt-8 border-t border-white/5">
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Quick Switch</span>
+      <div className="w-full max-w-sm space-y-6 animate-in slide-in-from-bottom-4 duration-700">
+        {!showExisting ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onFocus={handleInteraction}
+                placeholder="Seu Nickname"
+                maxLength={12}
+                autoFocus
+                className="w-full bg-white/10 border border-white/20 rounded-2xl py-5 px-6 outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all font-bold text-lg placeholder:text-white/20 text-white"
+              />
+              <button
+                type="submit"
+                disabled={name.trim().length < 2}
+                className="absolute right-2 top-2 bottom-2 bg-yellow-400 disabled:bg-white/10 disabled:text-white/20 text-indigo-950 px-4 rounded-xl active:scale-95 transition-all font-black flex items-center justify-center"
+              >
+                <ArrowRight size={20} />
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {existingUsers.slice(0, 4).map(user => (
+            
+            {existingUsers.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowExisting(true)}
+                className="w-full py-4 text-white/40 text-xs font-black uppercase tracking-[0.2em] hover:text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <UserCircle2 size={14} /> Usar perfil existente
+              </button>
+            )}
+          </form>
+        ) : (
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Selecione Perfil</span>
+              <button onClick={() => setShowExisting(false)} className="text-[10px] font-black text-yellow-400 uppercase">Voltar</button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 max-h-[40vh] overflow-y-auto pr-1">
+              {existingUsers.map(user => (
                 <button
                   key={user.id}
                   onClick={() => { handleInteraction(); onSelectUser(user); }}
-                  className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 active:bg-white/20 transition-all text-left"
+                  className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 active:scale-[0.98] transition-all text-left group"
                 >
-                  <div className={`w-8 h-8 rounded-lg ${user.avatarColor || 'bg-indigo-500'} flex items-center justify-center font-black text-xs shrink-0 text-white`}>
+                  <div className={`w-12 h-12 rounded-xl ${user.avatarColor || 'bg-indigo-500'} flex items-center justify-center font-black text-xl shadow-lg group-hover:scale-110 transition-transform`}>
                     {user.name[0].toUpperCase()}
                   </div>
-                  <span className="text-xs font-bold truncate text-white/80">{user.name}</span>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-white group-hover:text-yellow-400 transition-colors">{user.name}</span>
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user.totalSolved} resolvidos</span>
+                  </div>
                 </button>
               ))}
             </div>
