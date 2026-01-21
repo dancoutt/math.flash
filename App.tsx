@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [canRevive, setCanRevive] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [reviveToken, setReviveToken] = useState<number | null>(null);
 
   useEffect(() => {
     const initializeApp = () => {
@@ -41,6 +42,20 @@ const App: React.FC = () => {
     };
     initializeApp();
   }, []);
+
+  // Focus management: focus primary element whenever gameState changes
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      const el = document.querySelector('[data-focus="primary"]') as HTMLElement | null;
+      if (el) {
+        el.focus();
+      } else {
+        const main = document.querySelector('main[role="main"]') as HTMLElement | null;
+        main?.focus();
+      }
+    }, 50);
+    return () => window.clearTimeout(t);
+  }, [gameState, activeUserId]);
 
   const activeUser = users.find(u => u.id === activeUserId);
 
@@ -76,6 +91,13 @@ const App: React.FC = () => {
   const startGame = () => {
     setScore(0);
     setCanRevive(true);
+    setReviveToken(null);
+    setGameState('PLAYING');
+  };
+
+  const handleRevive = () => {
+    setCanRevive(false);
+    setReviveToken(Date.now());
     setGameState('PLAYING');
   };
 
@@ -103,7 +125,11 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-[#0f172a] overflow-hidden flex flex-col items-center">
-      <main className="w-full max-w-md min-h-screen relative bg-[#0f172a]">
+      <main 
+        className="w-full max-w-md min-h-screen relative bg-[#0f172a] outline-none" 
+        role="main" 
+        tabIndex={-1}
+      >
         {gameState === 'AUTH' && (
           <AccountEntry 
             onAccountCreated={handleAccountCreated} 
@@ -138,6 +164,7 @@ const App: React.FC = () => {
             score={score} 
             setScore={setScore} 
             highScore={activeUser?.highScores[difficulty] || 0}
+            reviveToken={reviveToken}
           />
         )}
 
@@ -147,7 +174,7 @@ const App: React.FC = () => {
             highScore={activeUser?.highScores[difficulty] || 0} 
             onRestart={startGame} 
             onMenu={() => setGameState('MENU')}
-            onRevive={() => { setCanRevive(false); setGameState('PLAYING'); }}
+            onRevive={handleRevive}
             canRevive={canRevive}
           />
         )}

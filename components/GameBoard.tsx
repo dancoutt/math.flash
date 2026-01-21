@@ -10,11 +10,19 @@ interface GameBoardProps {
   score: number;
   setScore: React.Dispatch<React.SetStateAction<number>>;
   highScore: number;
+  reviveToken?: number | null;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, setScore, highScore }) => {
+const GameBoard: React.FC<GameBoardProps> = ({ 
+  difficulty, 
+  onGameOver, 
+  score, 
+  setScore, 
+  highScore,
+  reviveToken = null
+}) => {
   const baseTime = getBaseTime(difficulty);
-  const [equation, setEquation] = useState<Equation>(generateEquation(0, difficulty));
+  const [equation, setEquation] = useState<Equation>(generateEquation(score, difficulty));
   const [timeLeft, setTimeLeft] = useState(baseTime);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [combo, setCombo] = useState(0);
@@ -23,10 +31,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
   const timerRef = useRef<number | null>(null);
   const lastTickRef = useRef<number>(Date.now());
   const lastSoundTickRef = useRef<number>(0);
+  const lastReviveRef = useRef<number | null>(null);
+
+  // Handle Revive: Reset time and new equation but keep score
+  useEffect(() => {
+    if (reviveToken && lastReviveRef.current !== reviveToken) {
+      lastReviveRef.current = reviveToken;
+      setTimeLeft(baseTime * 0.6); // Give 60% of time back on revive
+      setEquation(generateEquation(score, difficulty));
+      setFeedback(null);
+      setCombo(0);
+    }
+  }, [reviveToken, baseTime, score, difficulty]);
 
   const handleAnswer = useCallback((answer: boolean) => {
     if (answer === equation.isCorrect) {
-      // Feedback auditivo com pitch baseado no combo
       soundEngine.playSuccess(1 + (combo * 0.1));
       
       const nextCombo = combo + 1;
@@ -43,7 +62,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       setScore(newScore);
       setEquation(generateEquation(newScore, difficulty));
       
-      // Ganho de tempo proporcional ao quão rápido o player foi
       const isFast = timeLeft > (baseTime * 0.6);
       const timeBonus = isFast ? baseTime * 0.2 : 400;
       setTimeLeft(Math.min(baseTime, timeLeft + timeBonus));
@@ -69,7 +87,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
 
       setTimeLeft(prev => {
         const next = prev - delta;
-        
         const isLow = next < baseTime * 0.35;
         const tickInterval = isLow ? 200 : 800;
         
@@ -101,17 +118,20 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
   const isNewBest = score > highScore && highScore > 0;
   
   return (
-    <div className={`flex flex-col min-h-screen p-6 text-white overflow-hidden transition-all duration-300 relative
+    <div 
+      className={`flex flex-col min-h-screen p-6 text-white overflow-hidden transition-all duration-300 relative
       ${feedback === 'wrong' ? 'flash-wrong animate-shake' : feedback === 'correct' ? 'flash-correct' : ''}
-      ${isUrgent ? 'bg-red-950/10' : 'bg-transparent'}`}>
-      
+      ${isUrgent ? 'bg-red-950/10' : 'bg-transparent'}`}
+      role="region" 
+      aria-labelledby="game-equation"
+    >
       <div className="flex items-center justify-between pt-safe mb-8 relative z-10">
         <div className="flex flex-col">
           <span className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 
             ${isUrgent ? 'text-red-400 animate-pulse' : 'text-indigo-400'}`}>
             {difficulty}
           </span>
-          <div className="flex items-baseline gap-2 relative">
+          <div className="flex items-baseline gap-2 relative" aria-live="polite">
             <span className="text-6xl font-black tracking-tighter italic">{score}</span>
             {isNewBest && (
               <div className="absolute -right-2 top-0 translate-x-full bg-yellow-400 text-indigo-950 px-2 py-0.5 rounded-full text-[8px] font-black animate-bounce shadow-lg shadow-yellow-400/20 whitespace-nowrap uppercase">
@@ -128,7 +148,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
               <span className="text-[10px] font-black text-orange-500">{combo} COMBO</span>
             </div>
           )}
-          <div className="w-32 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+          <div className="w-32 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner" aria-hidden="true">
             <div 
               className={`h-full transition-all duration-100 ease-linear
                 ${progress < 35 ? 'bg-red-500 animate-pulse' : 'bg-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.5)]'}`}
@@ -139,10 +159,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-        <div className="text-white/30 text-4xl font-black mb-4 italic tracking-widest">{equation.text}</div>
-        <div className={`text-[9rem] font-black tracking-tighter leading-none italic
+        <div id="game-equation" className="text-white/30 text-4xl font-black mb-4 italic tracking-widest">{equation.text}</div>
+        <div 
+          className={`text-[9rem] font-black tracking-tighter leading-none italic
           ${feedback === 'correct' ? 'text-green-400 scale-110' : feedback === 'wrong' ? 'text-red-400' : 'text-white'} 
-          transition-all duration-200`}>
+          transition-all duration-200`}
+          aria-live="assertive"
+        >
           {equation.displayResult}
         </div>
       </div>
@@ -151,6 +174,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
         <button
           onClick={() => handleAnswer(false)}
           className="group bg-red-600 hover:bg-red-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#991b1b] active:shadow-none active:translate-y-2 transition-all outline-none"
+          aria-label="False"
+          data-focus="primary"
         >
           <X size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
           <span className="font-black text-xs tracking-[0.2em] italic">FALSE</span>
@@ -158,15 +183,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
         <button
           onClick={() => handleAnswer(true)}
           className="group bg-green-600 hover:bg-green-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#166534] active:shadow-none active:translate-y-2 transition-all outline-none"
+          aria-label="True"
         >
           <Check size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
           <span className="font-black text-xs tracking-[0.2em] italic">TRUE</span>
         </button>
       </div>
 
-      {/* Background Visual Feedback */}
       {combo >= 10 && (
-        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0">
+        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0" aria-hidden="true">
           <Zap size={200} className="absolute -top-10 -left-10 text-yellow-400 animate-pulse" />
           <Zap size={150} className="absolute -bottom-10 -right-10 text-yellow-400 animate-pulse" />
         </div>
