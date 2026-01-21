@@ -135,18 +135,14 @@
 
     <div id="root"></div>
 
-    <!-- Define signalAppReady globally before modules load -->
     <script>
       let hasReportedReady = false;
       window.signalAppReady = () => {
         if (hasReportedReady) return;
         hasReportedReady = true;
-        
         const loaderBar = document.getElementById('loader-bar');
         const splash = document.getElementById('splash-screen');
-        
         if (loaderBar) loaderBar.style.width = '100%';
-        
         setTimeout(() => {
           if (splash) {
             splash.style.opacity = '0';
@@ -157,10 +153,7 @@
           }
         }, 200);
       };
-
-      // Error handler fallback: if scripts fail, remove splash so user sees error/blank instead of loader
       window.onerror = function() {
-        console.error("Global script error detected, forcing splash removal.");
         window.signalAppReady();
       };
     </script>
@@ -170,7 +163,6 @@
     <script>
       let progress = 0;
       const loaderBar = document.getElementById('loader-bar');
-      
       const progressInterval = setInterval(() => {
         if (progress < 90 && !hasReportedReady) {
           progress += Math.random() * 15;
@@ -180,13 +172,8 @@
           clearInterval(progressInterval);
         }
       }, 100);
-
-      // Safety timeout: remove splash after 3s even if React doesn't load properly
       setTimeout(() => {
-        if (!hasReportedReady) {
-          console.warn("Safety timeout triggered splash removal.");
-          window.signalAppReady();
-        }
+        if (!hasReportedReady) window.signalAppReady();
       }, 3000);
     </script>
 </body>

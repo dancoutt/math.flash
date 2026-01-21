@@ -20,7 +20,6 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
   }, []);
 
   const handleInteraction = () => {
-    // Só tenta inicializar se ainda não foi feito, economizando processamento
     if (!isAudioInit.current) {
       soundEngine.init();
       isAudioInit.current = true;
@@ -41,7 +40,6 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
       className="flex flex-col items-center justify-center min-h-screen w-full p-8 text-white bg-[#0f172a] select-none"
       onClick={handleInteraction}
     >
-      {/* Header com Animação */}
       <div className="mb-12 text-center animate-in fade-in zoom-in duration-700">
         <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 animate-bounce">
           <Brain size={48} className="text-yellow-400" />
@@ -78,7 +76,6 @@ const AccountEntry: React.FC<AccountEntryProps> = ({ onAccountCreated, existingU
           </div>
         </form>
 
-        {/* Quick Switch - Limitado a 4 usuários para não quebrar o layout mobile */}
         {existingUsers.length > 0 && (
           <div className="space-y-4 pt-8 border-t border-white/5">
             <div className="flex items-center gap-4">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GameState, Difficulty, UserProfile, GameResult } from './types.ts';
 import Menu from './components/Menu.tsx';
@@ -40,7 +39,6 @@ const App: React.FC = () => {
         setIsReady(true);
       }
     };
-
     initializeApp();
   }, []);
 
