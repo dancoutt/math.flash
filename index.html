@@ -101,6 +101,25 @@
           50% { transform: translateY(-10px); }
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.2s ease-in-out; }
+
+        @keyframes flash-correct {
+          0% { background-color: rgba(34, 197, 94, 0.2); }
+          100% { background-color: transparent; }
+        }
+        .flash-correct { animation: flash-correct 0.3s ease-out; }
+
+        @keyframes flash-wrong {
+          0% { background-color: rgba(239, 68, 68, 0.2); }
+          100% { background-color: transparent; }
+        }
+        .flash-wrong { animation: flash-wrong 0.3s ease-out; }
     </style>
 
 <script type="importmap">
@@ -157,7 +176,6 @@
         }, 200);
       };
 
-      // Error handler fallback
       window.onerror = function() {
         window.signalAppReady();
       };
@@ -170,18 +188,17 @@
       const loaderBar = document.getElementById('loader-bar');
       const progressInterval = setInterval(() => {
         if (progress < 90 && !hasReportedReady) {
-          progress += Math.random() * 10;
+          progress += Math.random() * 8;
           if (progress > 90) progress = 90;
           if (loaderBar) loaderBar.style.width = progress + '%';
         } else {
           clearInterval(progressInterval);
         }
-      }, 150);
+      }, 100);
 
-      // Safety timeout
       setTimeout(() => {
         if (!hasReportedReady) window.signalAppReady();
-      }, 4000);
+      }, 3500);
     </script>
 </body>
 </html>

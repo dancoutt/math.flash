@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Check, X, Zap, AlertTriangle, Star, Award } from 'lucide-react';
+import { Check, X, Award, Flame, Zap } from 'lucide-react';
 import { Equation, Difficulty } from '../types.ts';
 import { generateEquation, getBaseTime } from '../services/mathEngine.ts';
 import { soundEngine } from '../services/soundEngine.ts';
@@ -19,7 +18,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
   const [timeLeft, setTimeLeft] = useState(baseTime);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [combo, setCombo] = useState(0);
-  const [showBonus, setShowBonus] = useState(false);
   const [hasBrokenRecord, setHasBrokenRecord] = useState(false);
   
   const timerRef = useRef<number | null>(null);
@@ -28,11 +26,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
 
   const handleAnswer = useCallback((answer: boolean) => {
     if (answer === equation.isCorrect) {
-      soundEngine.playSuccess();
+      // Feedback auditivo com pitch baseado no combo
+      soundEngine.playSuccess(1 + (combo * 0.1));
       
       const nextCombo = combo + 1;
-      const bonus = Math.floor(nextCombo / 5);
-      const increment = 1 + bonus;
+      const comboBonus = Math.floor(nextCombo / 5);
+      const increment = 1 + comboBonus;
       
       const newScore = score + increment;
       
@@ -44,29 +43,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       setScore(newScore);
       setEquation(generateEquation(newScore, difficulty));
       
-      if (bonus > 0) {
-        setShowBonus(true);
-        setTimeout(() => setShowBonus(false), 500);
-      }
-      
+      // Ganho de tempo proporcional ao quão rápido o player foi
       const isFast = timeLeft > (baseTime * 0.6);
-      const timeBonus = isFast ? baseTime * 0.15 : 300;
+      const timeBonus = isFast ? baseTime * 0.2 : 400;
       setTimeLeft(Math.min(baseTime, timeLeft + timeBonus));
       
       setCombo(nextCombo);
       setFeedback('correct');
       
       if (navigator.vibrate) navigator.vibrate(10);
-      
       setTimeout(() => setFeedback(null), 300);
     } else {
       soundEngine.playError();
-      setCombo(0);
-      if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]);
-      }
       setFeedback('wrong');
-      setTimeout(() => onGameOver(score), 300);
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+      setTimeout(() => onGameOver(score), 400);
     }
   }, [equation, score, timeLeft, difficulty, baseTime, onGameOver, setScore, combo, highScore, hasBrokenRecord]);
 
@@ -79,8 +70,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       setTimeLeft(prev => {
         const next = prev - delta;
         
-        const isLow = next < baseTime * 0.3;
-        const tickInterval = isLow ? 250 : 800;
+        const isLow = next < baseTime * 0.35;
+        const tickInterval = isLow ? 200 : 800;
+        
         if (now - lastSoundTickRef.current > tickInterval) {
           soundEngine.playTick(isLow);
           lastSoundTickRef.current = now;
@@ -88,8 +80,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
 
         if (next <= 0) {
           soundEngine.playError();
-          setCombo(0);
-          if (navigator.vibrate) navigator.vibrate(200);
           onGameOver(score);
           return 0;
         }
@@ -107,48 +97,52 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
   }, [onGameOver, score, baseTime]);
 
   const progress = (timeLeft / baseTime) * 100;
-  const isUrgent = progress < 30;
-  const multiplier = 1 + Math.floor(combo / 5);
+  const isUrgent = progress < 35;
   const isNewBest = score > highScore && highScore > 0;
   
   return (
     <div className={`flex flex-col min-h-screen p-6 text-white overflow-hidden transition-all duration-300 relative
-      ${feedback === 'wrong' ? 'bg-red-900/40 animate-shake' : 
-        isUrgent ? 'bg-red-950/40' :
-        difficulty === 'HARD' ? 'bg-rose-950/20' : 
-        difficulty === 'EASY' ? 'bg-emerald-950/20' : 'bg-transparent'}`}>
+      ${feedback === 'wrong' ? 'flash-wrong animate-shake' : feedback === 'correct' ? 'flash-correct' : ''}
+      ${isUrgent ? 'bg-red-950/10' : 'bg-transparent'}`}>
       
-      {isUrgent && (
-        <div className="absolute inset-0 pointer-events-none border-[12px] border-red-500/20 animate-pulse z-0" />
-      )}
-
       <div className="flex items-center justify-between pt-safe mb-8 relative z-10">
         <div className="flex flex-col">
-          <span className={`text-[9px] font-black uppercase tracking-[0.3em] 
-            ${isUrgent ? 'text-red-400' : difficulty === 'HARD' ? 'text-rose-400' : difficulty === 'EASY' ? 'text-emerald-400' : 'text-amber-400'}`}>
-            {difficulty} MODE
+          <span className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 
+            ${isUrgent ? 'text-red-400 animate-pulse' : 'text-indigo-400'}`}>
+            {difficulty}
           </span>
           <div className="flex items-baseline gap-2 relative">
-            <span className="text-5xl font-black tracking-tighter">{score}</span>
+            <span className="text-6xl font-black tracking-tighter italic">{score}</span>
             {isNewBest && (
-              <div className="absolute -right-2 top-0 translate-x-full flex items-center gap-1 bg-yellow-400 text-indigo-950 px-2 py-0.5 rounded-full text-[8px] font-black animate-pulse shadow-lg whitespace-nowrap">
-                <Award size={10} /> NEW BEST!
+              <div className="absolute -right-2 top-0 translate-x-full bg-yellow-400 text-indigo-950 px-2 py-0.5 rounded-full text-[8px] font-black animate-bounce shadow-lg shadow-yellow-400/20 whitespace-nowrap uppercase">
+                New Record
               </div>
             )}
           </div>
         </div>
-        <div className="w-28 h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5 relative">
-          <div 
-            className={`h-full transition-all duration-75 ease-linear
-              ${progress < 30 ? 'bg-red-500 animate-pulse' : 'bg-yellow-400'}`}
-            style={{ width: `${progress}%` }}
-          />
+
+        <div className="flex flex-col items-end gap-2">
+          {combo > 2 && (
+            <div className="flex items-center gap-1.5 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/20 animate-in zoom-in duration-300">
+              <Flame size={12} className="text-orange-500 fill-orange-500" />
+              <span className="text-[10px] font-black text-orange-500">{combo} COMBO</span>
+            </div>
+          )}
+          <div className="w-32 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+            <div 
+              className={`h-full transition-all duration-100 ease-linear
+                ${progress < 35 ? 'bg-red-500 animate-pulse' : 'bg-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.5)]'}`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-        <div className="text-white/20 text-4xl font-black mb-2 italic">{equation.text}</div>
-        <div className="text-[8rem] font-black tracking-tighter leading-none">
+        <div className="text-white/30 text-4xl font-black mb-4 italic tracking-widest">{equation.text}</div>
+        <div className={`text-[9rem] font-black tracking-tighter leading-none italic
+          ${feedback === 'correct' ? 'text-green-400 scale-110' : feedback === 'wrong' ? 'text-red-400' : 'text-white'} 
+          transition-all duration-200`}>
           {equation.displayResult}
         </div>
       </div>
@@ -156,19 +150,27 @@ const GameBoard: React.FC<GameBoardProps> = ({ difficulty, onGameOver, score, se
       <div className="grid grid-cols-2 gap-6 mb-12 relative z-10">
         <button
           onClick={() => handleAnswer(false)}
-          className="bg-red-600 hover:bg-red-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_10px_0_0_#991b1b] active:shadow-none active:translate-y-2 transition-all outline-none"
+          className="group bg-red-600 hover:bg-red-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#991b1b] active:shadow-none active:translate-y-2 transition-all outline-none"
         >
-          <X size={44} strokeWidth={4} />
-          <span className="font-black text-xs tracking-widest">WRONG</span>
+          <X size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
+          <span className="font-black text-xs tracking-[0.2em] italic">FALSE</span>
         </button>
         <button
           onClick={() => handleAnswer(true)}
-          className="bg-green-600 hover:bg-green-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_10px_0_0_#166534] active:shadow-none active:translate-y-2 transition-all outline-none"
+          className="group bg-green-600 hover:bg-green-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#166534] active:shadow-none active:translate-y-2 transition-all outline-none"
         >
-          <Check size={44} strokeWidth={4} />
-          <span className="font-black text-xs tracking-widest">RIGHT</span>
+          <Check size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
+          <span className="font-black text-xs tracking-[0.2em] italic">TRUE</span>
         </button>
       </div>
+
+      {/* Background Visual Feedback */}
+      {combo >= 10 && (
+        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0">
+          <Zap size={200} className="absolute -top-10 -left-10 text-yellow-400 animate-pulse" />
+          <Zap size={150} className="absolute -bottom-10 -right-10 text-yellow-400 animate-pulse" />
+        </div>
+      )}
     </div>
   );
 };
