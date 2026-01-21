@@ -33,11 +33,10 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const lastSoundTickRef = useRef<number>(0);
   const lastReviveRef = useRef<number | null>(null);
 
-  // Handle Revive: Reset time and new equation but keep score
   useEffect(() => {
     if (reviveToken && lastReviveRef.current !== reviveToken) {
       lastReviveRef.current = reviveToken;
-      setTimeLeft(baseTime * 0.6); // Give 60% of time back on revive
+      setTimeLeft(baseTime * 0.65); 
       setEquation(generateEquation(score, difficulty));
       setFeedback(null);
       setCombo(0);
@@ -46,7 +45,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
   const handleAnswer = useCallback((answer: boolean) => {
     if (answer === equation.isCorrect) {
-      soundEngine.playSuccess(1 + (combo * 0.1));
+      soundEngine.playSuccess(1 + Math.min(combo * 0.05, 0.8));
       
       const nextCombo = combo + 1;
       const comboBonus = Math.floor(nextCombo / 5);
@@ -62,19 +61,21 @@ const GameBoard: React.FC<GameBoardProps> = ({
       setScore(newScore);
       setEquation(generateEquation(newScore, difficulty));
       
-      const isFast = timeLeft > (baseTime * 0.6);
-      const timeBonus = isFast ? baseTime * 0.2 : 400;
-      setTimeLeft(Math.min(baseTime, timeLeft + timeBonus));
+      // Speed bonus: faster answering rewards more time
+      const timeElapsed = baseTime - timeLeft;
+      const speedMultiplier = Math.max(0.1, 1 - (timeElapsed / baseTime));
+      const timeBonus = (baseTime * 0.15) * speedMultiplier + 200;
       
+      setTimeLeft(Math.min(baseTime, timeLeft + timeBonus));
       setCombo(nextCombo);
       setFeedback('correct');
       
       if (navigator.vibrate) navigator.vibrate(10);
-      setTimeout(() => setFeedback(null), 300);
+      setTimeout(() => setFeedback(null), 250);
     } else {
       soundEngine.playError();
       setFeedback('wrong');
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+      if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
       setTimeout(() => onGameOver(score), 400);
     }
   }, [equation, score, timeLeft, difficulty, baseTime, onGameOver, setScore, combo, highScore, hasBrokenRecord]);
@@ -116,12 +117,14 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const progress = (timeLeft / baseTime) * 100;
   const isUrgent = progress < 35;
   const isNewBest = score > highScore && highScore > 0;
+  const isHyper = combo >= 10;
   
   return (
     <div 
       className={`flex flex-col min-h-screen p-6 text-white overflow-hidden transition-all duration-300 relative
       ${feedback === 'wrong' ? 'flash-wrong animate-shake' : feedback === 'correct' ? 'flash-correct' : ''}
-      ${isUrgent ? 'bg-red-950/10' : 'bg-transparent'}`}
+      ${isUrgent ? 'bg-red-950/20' : 'bg-transparent'}
+      ${isHyper ? 'hyper-state' : ''}`}
       role="region" 
       aria-labelledby="game-equation"
     >
@@ -132,7 +135,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
             {difficulty}
           </span>
           <div className="flex items-baseline gap-2 relative" aria-live="polite">
-            <span className="text-6xl font-black tracking-tighter italic">{score}</span>
+            <span className="text-6xl font-black tracking-tighter italic drop-shadow-lg">{score}</span>
             {isNewBest && (
               <div className="absolute -right-2 top-0 translate-x-full bg-yellow-400 text-indigo-950 px-2 py-0.5 rounded-full text-[8px] font-black animate-bounce shadow-lg shadow-yellow-400/20 whitespace-nowrap uppercase">
                 New Record
@@ -143,15 +146,16 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
         <div className="flex flex-col items-end gap-2">
           {combo > 2 && (
-            <div className="flex items-center gap-1.5 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/20 animate-in zoom-in duration-300">
-              <Flame size={12} className="text-orange-500 fill-orange-500" />
-              <span className="text-[10px] font-black text-orange-500">{combo} COMBO</span>
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all duration-300 animate-in zoom-in
+              ${isHyper ? 'bg-yellow-400 text-indigo-950 border-yellow-300' : 'bg-orange-500/20 text-orange-500 border-orange-500/20'}`}>
+              <Flame size={12} className={isHyper ? 'fill-indigo-950' : 'fill-orange-500'} />
+              <span className="text-[10px] font-black">{combo} COMBO</span>
             </div>
           )}
-          <div className="w-32 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner" aria-hidden="true">
+          <div className="w-32 h-4 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner p-0.5" aria-hidden="true">
             <div 
-              className={`h-full transition-all duration-100 ease-linear
-                ${progress < 35 ? 'bg-red-500 animate-pulse' : 'bg-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.5)]'}`}
+              className={`h-full rounded-full transition-all duration-100 ease-linear
+                ${progress < 35 ? 'bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]'}`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -161,8 +165,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
         <div id="game-equation" className="text-white/30 text-4xl font-black mb-4 italic tracking-widest">{equation.text}</div>
         <div 
-          className={`text-[9rem] font-black tracking-tighter leading-none italic
-          ${feedback === 'correct' ? 'text-green-400 scale-110' : feedback === 'wrong' ? 'text-red-400' : 'text-white'} 
+          className={`text-[9rem] font-black tracking-tighter leading-none italic drop-shadow-2xl
+          ${feedback === 'correct' ? 'text-green-400 scale-110' : feedback === 'wrong' ? 'text-red-400' : isHyper ? 'text-yellow-400' : 'text-white'} 
           transition-all duration-200`}
           aria-live="assertive"
         >
@@ -173,27 +177,27 @@ const GameBoard: React.FC<GameBoardProps> = ({
       <div className="grid grid-cols-2 gap-6 mb-12 relative z-10">
         <button
           onClick={() => handleAnswer(false)}
-          className="group bg-red-600 hover:bg-red-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#991b1b] active:shadow-none active:translate-y-2 transition-all outline-none"
+          className="group bg-red-600 hover:bg-red-500 text-white rounded-[2.5rem] p-10 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#991b1b] active:shadow-none active:translate-y-2 transition-all outline-none"
           aria-label="False"
           data-focus="primary"
         >
-          <X size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
+          <X size={54} strokeWidth={4} className="group-active:scale-90 transition-transform" />
           <span className="font-black text-xs tracking-[0.2em] italic">FALSE</span>
         </button>
         <button
           onClick={() => handleAnswer(true)}
-          className="group bg-green-600 hover:bg-green-500 text-white rounded-[2.5rem] p-8 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#166534] active:shadow-none active:translate-y-2 transition-all outline-none"
+          className="group bg-green-600 hover:bg-green-500 text-white rounded-[2.5rem] p-10 flex flex-col items-center gap-2 shadow-[0_12px_0_0_#166534] active:shadow-none active:translate-y-2 transition-all outline-none"
           aria-label="True"
         >
-          <Check size={48} strokeWidth={4} className="group-active:scale-90 transition-transform" />
+          <Check size={54} strokeWidth={4} className="group-active:scale-90 transition-transform" />
           <span className="font-black text-xs tracking-[0.2em] italic">TRUE</span>
         </button>
       </div>
 
-      {combo >= 10 && (
-        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0" aria-hidden="true">
-          <Zap size={200} className="absolute -top-10 -left-10 text-yellow-400 animate-pulse" />
-          <Zap size={150} className="absolute -bottom-10 -right-10 text-yellow-400 animate-pulse" />
+      {isHyper && (
+        <div className="absolute inset-0 pointer-events-none opacity-10 overflow-hidden z-0" aria-hidden="true">
+          <Zap size={250} className="absolute -top-10 -left-10 text-yellow-400 animate-pulse" />
+          <Zap size={200} className="absolute -bottom-10 -right-10 text-yellow-400 animate-pulse" />
         </div>
       )}
     </div>

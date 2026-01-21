@@ -8,16 +8,16 @@ export const generateEquation = (score: number, difficulty: Difficulty): Equatio
 
   switch (difficulty) {
     case 'EASY':
-      maxNum = 8 + Math.floor(score / 2);
-      operators = score > 10 ? ['+', '-'] : ['+'];
+      maxNum = 10 + Math.floor(score / 1.5);
+      operators = score > 8 ? ['+', '-'] : ['+'];
       break;
     case 'MEDIUM':
-      maxNum = 20 + (level * 3);
+      maxNum = 25 + (level * 4);
       operators = ['+', '-'];
-      if (score > 10) operators.push('*');
+      if (score > 12) operators.push('*');
       break;
     case 'HARD':
-      maxNum = 40 + (level * 6);
+      maxNum = 45 + (level * 5);
       operators = ['+', '-', '*'];
       break;
   }
@@ -26,9 +26,11 @@ export const generateEquation = (score: number, difficulty: Difficulty): Equatio
   let a: number, b: number;
 
   if (operator === '*') {
-    const multMax = difficulty === 'HARD' ? 12 : 9;
-    a = Math.floor(Math.random() * (difficulty === 'EASY' ? 5 : multMax)) + 2;
-    b = Math.floor(Math.random() * (difficulty === 'HARD' ? level + 4 : 6)) + 2;
+    // Keep multiplications manageable even on hard
+    const multMaxA = difficulty === 'HARD' ? 12 : 9;
+    const multMaxB = difficulty === 'HARD' ? 9 : 6;
+    a = Math.floor(Math.random() * multMaxA) + 2;
+    b = Math.floor(Math.random() * multMaxB) + 2;
   } else {
     a = Math.floor(Math.random() * maxNum) + 1;
     b = Math.floor(Math.random() * maxNum) + 1;
@@ -43,15 +45,17 @@ export const generateEquation = (score: number, difficulty: Difficulty): Equatio
     default: actualResult = a + b;
   }
 
-  const isCorrect = Math.random() > 0.4;
+  // 40% chance of being false for balance
+  const isCorrect = Math.random() > 0.45;
   let displayResult = actualResult;
 
   if (!isCorrect) {
-    const deviationRange = difficulty === 'HARD' ? 5 : 3;
+    const deviationRange = difficulty === 'HARD' ? 4 : 2;
+    // Ensure the false result is close but never equal to the correct one
     let offset = (Math.floor(Math.random() * deviationRange) + 1) * (Math.random() > 0.5 ? 1 : -1);
     displayResult = actualResult + offset;
     
-    if (displayResult < 0) displayResult = Math.abs(displayResult) + 1;
+    if (displayResult < 1) displayResult = Math.abs(displayResult) + 2;
     if (displayResult === actualResult) displayResult += 1;
   }
 
@@ -66,8 +70,8 @@ export const generateEquation = (score: number, difficulty: Difficulty): Equatio
 export const getBaseTime = (difficulty: Difficulty): number => {
   switch (difficulty) {
     case 'EASY': return 8000;
-    case 'MEDIUM': return 4000;
-    case 'HARD': return 2500;
-    default: return 4000;
+    case 'MEDIUM': return 4500;
+    case 'HARD': return 2800; // Slightly more generous than 2.5s for initial accessibility
+    default: return 4500;
   }
 };
